@@ -25,19 +25,19 @@
     "data": {
         "train_data": {
             "key": "train",
-            "file": "/ais/gobi3/u/nitish/mnist/mnist.h5"
+            "file": "mnist.h5"
         },
         "train_labels": {
             "key": "train_labels",
-            "file": "/ais/gobi3/u/nitish/mnist/mnist.h5"
+            "file": "mnist.h5"
         },
         "validation_data": {
             "key": "validation",
-            "file": "/ais/gobi3/u/nitish/mnist/mnist.h5"
+            "file": "mnist.h5"
         },
         "validation_labels": {
             "key": "validation_labels",
-            "file": "/ais/gobi3/u/nitish/mnist/mnist.h5"
+            "file": "mnist.h5"
         }
     }
 }
