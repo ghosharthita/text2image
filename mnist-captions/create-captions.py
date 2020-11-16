@@ -190,11 +190,11 @@ def create_mnist_captions_dataset(data, labels, banned, num=10000):
         if curr_num == num:
             break
 
-    return np.float32(images), np.int32(captions), counts
+    return np.float64(images), np.int32(captions), counts
 
 if __name__ == '__main__':
-    data = np.copy(h5py.File('/ais/gobi3/u/nitish/mnist/mnist.h5', 'r')["train"])
-    labels = np.copy(h5py.File('/ais/gobi3/u/nitish/mnist/mnist.h5', 'r')["train_labels"])
+    data = np.copy(h5py.File('mnist.h5', 'r')["train"])
+    labels = np.copy(h5py.File('mnist.h5', 'r')["train_labels"])
 
     image = create_1digit_mnist_image_topright(data[327,:])
     pylab.figure()

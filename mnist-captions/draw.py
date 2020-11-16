@@ -198,7 +198,7 @@ class ReccurentAttentionVAE():
         self._kl_final, self._logpxz, self._log_likelihood, self._c_ts, self._c_ts_gener, self._x, self._run_steps, self._updates_train, self._updates_gener, self._read_attent_params, self._write_attent_params, self._write_attent_params_gener, self._params = build_lstm_attention_vae(self.dimX, self.dimReadAttent, self.dimWriteAttent, self.dimRNNEnc, self.dimRNNDec, self.dimZ, self.runSteps, self.pathToWeights)
 
     def _build_sample_from_prior_function(self):
-        print 'building sample from prior function'
+        print ('building sample from prior function')
         t1 = datetime.datetime.now()
         self._sample_from_prior = theano.function(inputs=[self._run_steps], 
                                                     outputs=[self._c_ts_gener, self._write_attent_params_gener],
@@ -207,7 +207,7 @@ class ReccurentAttentionVAE():
         print(t2-t1)
 
     def _build_validate_function(self, isVal=True):
-        print 'building validate function'
+        print ('building validate function')
         t1 = datetime.datetime.now()
         if isVal:
             data = self.val_data
@@ -225,7 +225,7 @@ class ReccurentAttentionVAE():
         print (t2-t1)
 
     def _build_train_function(self):
-        print 'building gradient function'
+        print ('building gradient function')
         t1 = datetime.datetime.now()
         gradients = T.grad(self._log_likelihood, self._params)
         t2 = datetime.datetime.now()
@@ -256,7 +256,7 @@ class ReccurentAttentionVAE():
             self._updates_train_and_params[param_his] = param_his_new
             self._updates_train_and_params[param] = param - (self._lr / T.sqrt(param_his_new + 1e-6)) * grad
 
-        print 'building train function'
+        print ('building train function')
         t1 = datetime.datetime.now()
         self._train_function = theano.function(inputs=[self._index, self._lr, self._run_steps], 
                                                 outputs=[self._kl_final, self._logpxz, self._log_likelihood, self._c_ts, self._read_attent_params, self._write_attent_params],
@@ -281,7 +281,7 @@ class ReccurentAttentionVAE():
         if isValValue == False:
             n_local_batches = self.n_test_batches
 
-        all_outputs = np.array([0.0,0.0,0.0])
+        all_outputs = np.array([0.0,0.0,0.0], dtype=np.float32)
         for i_batch in xrange(n_local_batches):
             [kl, logpxz, log_likelihood] = self._validate_function(i_batch, self.runSteps)
             all_outputs[0] = all_outputs[0] + kl
@@ -309,10 +309,10 @@ class ReccurentAttentionVAE():
             if savedir == None:
                 savedir = "."
             weights_f_name = ("%s/attention-vae-%s-%s-%s-%s-%s-%s.h5" % (savedir, curr_time.year, curr_time.month, curr_time.day, curr_time.hour, curr_time.minute, curr_time.second))
-            print weights_f_name
+            print (weights_f_name)
 
-        all_outputs = np.array([0.0,0.0,0.0])
-        prev_outputs = np.array([float("inf"),float("inf"),float("inf")])
+        all_outputs = np.array([0.0,0.0,0.0], dtype=np.float32)
+        prev_outputs = np.array([float("inf"),float("inf"),float("inf")], dtype=np.float32)
 
         for epoch in xrange(0, epochs):
             a = datetime.datetime.now()
@@ -327,11 +327,11 @@ class ReccurentAttentionVAE():
 
             if save == True:
                 self.save_weights(weights_f_name, c_ts, read_attent_params, write_attent_params)
-                print 'Done Saving Weights'
+                print ('Done Saving Weights')
 
             all_outputs = all_outputs / self.n_batches
-            print 'Train Results'
-            print float(all_outputs[0]), float(all_outputs[1]), float(all_outputs[2])
+            print ('Train Results')
+            print (float(all_outputs[0]), float(all_outputs[1]), float(all_outputs[2]))
 
             if float(all_outputs[-1]) > float(prev_outputs[-1]):
                 print("Learning Rate Decreased")
@@ -341,12 +341,12 @@ class ReccurentAttentionVAE():
 
             if validateAfter != 0:
                 if epoch % validateAfter == 0 and epoch != 0:
-                    print 'Validation Results'
+                    print ('Validation Results')
                     val_results = self.validate()
-                    print float(val_results[0]), float(val_results[1]), float(val_results[2])
-                    print '\n'
+                    print (float(val_results[0]), float(val_results[1]), float(val_results[2]))
+                    print ('\n')
 
-            all_outputs = np.array([0.0,0.0,0.0])
+            all_outputs = np.array([0.0,0.0,0.0], dtype=np.float32)
             sys.stdout.flush()
 
 if __name__ == '__main__':
@@ -374,9 +374,9 @@ if __name__ == '__main__':
         val_key = model["data"]["validation"]["key"]
         val_file = model["data"]["validation"]["file"]
     else:
-        train_file = "/ais/gobi3/u/nitish/mnist/mnist.h5"
+        train_file = "mnist.h5"
         train_key = "train"
-        val_file = "/ais/gobi3/u/nitish/mnist/mnist.h5"
+        val_file = "mnist.h5"
         val_key = "validation"
 
     train_data = np.copy(h5py.File(train_file, 'r')[train_key])
