@@ -23,6 +23,7 @@ from random import randint
 create_captions = __import__('create-captions')
 create_mnist_captions_dataset = create_captions.create_mnist_captions_dataset
 
+theano.config.scan.allow_gc = True
 assert(theano.config.scan.allow_gc == True), "set scan.allow_gc to True ; otherwise you will run out of gpu memory"
 assert(theano.config.allow_gc == True), "set allow_gc to True ; otherwise you will run out of gpu memory"
 
@@ -320,12 +321,12 @@ class ReccurentAttentionVAE():
 
         self.banned = [randint(0,10) for i in xrange(12)]
 
-        print 'Banned configurations are :'
-        print self.banned
+        print ('Banned configurations are :')
+        print (self.banned)
 
         inputImages, inputCaptions, inputCounts = create_mnist_captions_dataset(inputData, inputLabels, self.banned)
-        print 'Train Dataset'
-        print inputImages.shape, inputCaptions.shape, inputCounts
+        print ('Train Dataset')
+        print (inputImages.shape, inputCaptions.shape, inputCounts)
 
         self.train_data = theano.shared(inputImages)
         self.train_captions = theano.shared(inputCaptions)
@@ -334,10 +335,10 @@ class ReccurentAttentionVAE():
         del inputImages
         del inputCaptions
 
-        if valData != None:
+        if np.any(valData == None):
             valImages, valCaptions, valCounts = create_mnist_captions_dataset(valData, valLabels, self.banned)
-            print 'Val Dataset'
-            print valImages.shape, valCaptions.shape, valCounts
+            print ('Val Dataset')
+            print (valImages.shape, valCaptions.shape, valCounts)
 
             self.val_data = theano.shared(valImages)
             self.val_captions = theano.shared(valCaptions)
@@ -348,7 +349,7 @@ class ReccurentAttentionVAE():
         self._kl_final, self._logpxz, self._log_likelihood, self._c_ts, self._c_ts_gener, self._x, self._y, self._run_steps, self._updates_train, self._updates_gener, self._read_attent_params, self._write_attent_params, self._write_attent_params_gener, self._alphas_gener, self._params, self._mu_prior_t_gener, self._log_sigma_prior_t_gener = build_lang_encoder_and_attention_vae_decoder(self.dimY, self.dimLangRNN, self.dimAlign, self.dimX, self.dimReadAttent, self.dimWriteAttent, self.dimRNNEnc, self.dimRNNDec, self.dimZ, self.runSteps, self.pathToWeights)
 
     def _build_sample_from_prior_function(self):
-        print 'building sample from prior function'
+        print ('building sample from prior function')
         t1 = datetime.datetime.now()
         self._sample_from_prior = theano.function(inputs=[self._run_steps, self._y], 
                                                     outputs=[self._c_ts_gener, self._write_attent_params_gener, self._alphas_gener, self._mu_prior_t_gener, self._log_sigma_prior_t_gener],
@@ -357,7 +358,7 @@ class ReccurentAttentionVAE():
         print(t2-t1)
 
     def _build_sample_from_input_function(self):
-        print 'building sample from input function'
+        print ('building sample from input function')
         t1 = datetime.datetime.now()
         self._sample_from_input = theano.function(inputs=[self._x, self._run_steps, self._y], 
                                                     outputs=[self._c_ts, self._write_attent_params],
@@ -367,7 +368,7 @@ class ReccurentAttentionVAE():
 
 
     def _build_validate_function(self):
-        print 'building validate function'
+        print ('building validate function')
         t1 = datetime.datetime.now()
         data = self.val_data
         captions = self.val_captions
@@ -385,7 +386,7 @@ class ReccurentAttentionVAE():
         print (t2-t1)
 
     def _build_train_function(self):
-        print 'building gradient function'
+        print ('building gradient function')
         t1 = datetime.datetime.now()
         gradients = T.grad(self._log_likelihood, self._params)
         t2 = datetime.datetime.now()
@@ -417,7 +418,7 @@ class ReccurentAttentionVAE():
             self._updates_train_and_params[param_his] = param_his_new
             self._updates_train_and_params[param] = param - (self._lr / T.sqrt(param_his_new + 1e-6)) * grad
 
-        print 'building train function'
+        print ('building train function')
         t1 = datetime.datetime.now()
         self._train_function = theano.function(inputs=[self._index_im, self._index_cap, self._lr, self._run_steps], 
                                                 outputs=[self._kl_final, self._logpxz, self._log_likelihood, self._c_ts, self._read_attent_params, self._write_attent_params],
@@ -447,7 +448,7 @@ class ReccurentAttentionVAE():
         self._build_validate_function()
         sys.stdout.flush()
 
-        all_outputs = np.array([0.0,0.0,0.0])
+        all_outputs = np.array([0.0,0.0,0.0], dtype=np.float32)
         for i in xrange(0,self.val_shape[0],self.batch_size):
             i_vector = np.int32(np.arange(i,i+self.batch_size))
             [kl, logpxz, log_likelihood] = self._validate_function(i_vector, i_vector, self.runSteps)
@@ -479,11 +480,11 @@ class ReccurentAttentionVAE():
             if savedir == None:
                 savedir == "."
             weights_f_name = ("%s/attention-vae-%s-%s-%s-%s-%s-%s.h5" % (savedir, curr_time.year, curr_time.month, curr_time.day, curr_time.hour, curr_time.minute, curr_time.second))
-            print weights_f_name
+            print (weights_f_name)
 
-        all_outputs = np.array([0.0,0.0,0.0])
-        prev_outputs = np.array([float("inf"),float("inf"),float("inf")])
-        prev_val_results = np.array([float("inf"),float("inf"),float("inf")])
+        all_outputs = np.array([0.0,0.0,0.0],dtype=np.float32)
+        prev_outputs = np.array([float("inf"),float("inf"),float("inf")],dtype=np.float32)
+        prev_val_results = np.array([float("inf"),float("inf"),float("inf")], dtype=np.float32)
 
         for epoch in xrange(0, epochs):
             a = datetime.datetime.now()
@@ -505,18 +506,18 @@ class ReccurentAttentionVAE():
 
             if save == True:
                 self.save_weights(weights_f_name, c_ts, read_attent_params, write_attent_params)
-                print 'Done Saving Weights'
+                print ('Done Saving Weights')
 
             all_outputs = all_outputs / self.input_shape[0] # 5 captions per image
-            print 'Train Results'
-            print float(all_outputs[0]), float(all_outputs[1]), float(all_outputs[2])
+            print ('Train Results')
+            print (float(all_outputs[0]), float(all_outputs[1]), float(all_outputs[2]))
 
             if validateAfter != 0:
                 if epoch % validateAfter == 0:
-                    print 'Validation Results'
+                    print ('Validation Results')
                     val_results = self.validate()
-                    print float(val_results[0]), float(val_results[1]), float(val_results[2])
-                    print '\n'
+                    print (float(val_results[0]), float(val_results[1]), float(val_results[2]))
+                    print ('\n')
 
             if float(val_results[-1]) > float(prev_val_results[-1]):
                 if count == reduceAfter:
@@ -527,7 +528,7 @@ class ReccurentAttentionVAE():
                     sys.exit()
                     break
                 else:
-                    print "Warning Val Results Got Worse"
+                    print ("Warning Val Results Got Worse")
                     count = count + 1
                     prev_val_results = np.copy(val_results)
             elif self.reduceLRAfter != 0:
@@ -538,15 +539,15 @@ class ReccurentAttentionVAE():
                 prev_val_results = np.copy(val_results)
 
             inputImages, inputCaptions, inputCounts = create_mnist_captions_dataset(self.inputData, self.inputLabels, self.banned)
-            print 'Recreated Train Dataset'
-            print inputCounts
+            print ('Recreated Train Dataset')
+            print (inputCounts)
 
             self.train_data.set_value(inputImages)
             self.train_captions.set_value(inputCaptions)
             self.input_shape = inputImages.shape
 
-            print '\n'
-            all_outputs = np.array([0.0,0.0,0.0])
+            print ('\n')
+            all_outputs = np.array([0.0,0.0,0.0], dtype=np.float32)
             sys.stdout.flush()
 
 if __name__ == '__main__':
@@ -596,9 +597,9 @@ if __name__ == '__main__':
         val_labels_key = model["data"]["validation_labels"]["key"]
         val_labels_file = model["data"]["validation_labels"]["file"]
     else:
-        train_file = "/ais/gobi3/u/nitish/mnist/mnist.h5"
+        train_file = "mnist.h5"
         train_key = "train"
-        val_file = "/ais/gobi3/u/nitish/mnist/mnist.h5"
+        val_file = "mnist.h5"
         val_key = "validation"
 
     train_data = np.copy(h5py.File(train_data_file, 'r')[train_data_key])
@@ -607,7 +608,7 @@ if __name__ == '__main__':
     val_data = np.copy(h5py.File(val_data_file, 'r')[val_data_key])
     val_labels = np.copy(h5py.File(val_labels_file, 'r')[val_labels_key])
 
-    print train_data.shape, train_labels.shape, val_data.shape, val_labels.shape
+    print (train_data.shape, train_labels.shape, val_data.shape, val_labels.shape)
 
     savedir = None
     if "savedir" in model:

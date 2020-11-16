@@ -74,7 +74,7 @@ if __name__ == '__main__':
     
     y, words = sent2matrix(sentence, dictionary)
     y = np.int32(np.repeat(y, 100, axis=0))
-    print y.shape
+    print (y.shape)
 
     height = int(math.sqrt(dimX))
     width = int(math.sqrt(dimX))
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     ct_s = sigmoid(ct_s)
 
     dimension = int(math.sqrt(dimX))
-    print dimension, dimension
+    print (dimension, dimension)
     
     most_used = np.float32(np.zeros((y.shape[1])))
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         probs = str(most_used[best_i]) + ' ' + str(most_used[second_best_i]) + ' ' + str(most_used[third_best_i]) + ' ' + str(most_used[forth_best_i]) + ' ' + str(most_used[fifth_best_i]) + ' ' + str(most_used[sixth_best_i]) + ' ' + str(most_used[seventh_best_i])
 
         most_used = np.float32(np.zeros((y.shape[1])))
-        print text, probs
+        print (text, probs)
 
         sentence = sentence.replace(' ', '-')
 

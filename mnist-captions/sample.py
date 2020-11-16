@@ -59,9 +59,9 @@ if __name__ == '__main__':
         val_key = model["data"]["validation"]["key"]
         val_file = model["data"]["validation"]["file"]
     else:
-        train_file = "/ais/gobi3/u/nitish/mnist/mnist.h5"
+        train_file = "mnist.h5"
         train_key = "train"
-        val_file = "/ais/gobi3/u/nitish/mnist/mnist.h5"
+        val_file = "mnist.h5"
         val_key = "validation"
 
     # dummy data just for the sake of passing something as a parameter
